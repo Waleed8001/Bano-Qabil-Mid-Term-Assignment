@@ -11,11 +11,14 @@ GMAIL = 'waleedkamal801@gmail.com'
 GMAILPASSWORD = 'kuep ufnk icfr pmwi'
 GMAILAPI = 'smtp.gmail.com'
 GMAILPORT = 587
+
+# It will take all data from Google Spreadsheet.
 def take():
     a = requests.get(url = url1)
     b = a.json().get('hospital',[])
     return b
 
+# It is used to send message through Gmail to the person given in the Google Spreadsheet.
 def mail(GMAILTO,subject,message):
     with smtplib.SMTP(GMAILAPI,GMAILPORT) as has:
         has.starttls()
@@ -25,6 +28,7 @@ def mail(GMAILTO,subject,message):
         has.quit()
 
 # For Faisal Bhai
+# This function is used to Change status of Non Visited person to Last Warning.
 def update_sheet_for_Not_visiting(i_id):
     o = i_id
     hospitalAppointmentScheduler = {
@@ -36,6 +40,7 @@ def update_sheet_for_Not_visiting(i_id):
     update = requests.put(url = f"{url3}/{o}",json = hospitalAppointmentScheduler)
     update.raise_for_status()
 
+# This function is used to Change status of Registered person to Non Visited.
 def update_sheet_for_Registered(i_id):
     o = i_id
     hospitalAppointmentScheduler = {
@@ -48,6 +53,7 @@ def update_sheet_for_Registered(i_id):
     update.raise_for_status()    
 
 # For Faisal Bhai
+# This function is used to Delete the record of Visited Person.
 def delete_detail_of_visited_person(i_id):
     i = i_id
     del_data = requests.delete(url=f"{url4}/{i}")
