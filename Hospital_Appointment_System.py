@@ -24,6 +24,7 @@ def mail(GMAILTO,subject,message):
         has.sendmail(GMAIL,GMAILTO,send)
         has.quit()
 
+# For Faisal Bhai
 def update_sheet_for_Not_visiting(i_id):
     o = i_id
     hospitalAppointmentScheduler = {
@@ -46,7 +47,8 @@ def update_sheet_for_Registered(i_id):
     update = requests.put(url = f"{url3}/{o}",json = hospitalAppointmentScheduler)
     update.raise_for_status()    
 
-def deletedetail(i_id):
+# For Faisal Bhai
+def delete_detail_of_visited_person(i_id):
     i = i_id
     del_data = requests.delete(url=f"{url4}/{i}")
     del_data.raise_for_status()
@@ -66,9 +68,11 @@ For any query please call:
         mail(i['email'],subject,message)
         update_sheet_for_Registered(i['id'])
 
+    # For Faisal Bhai
     if i['status'] == "Visited":
-        deletedetail(i['id'])
+        delete_detail_of_visited_person(i['id'])
 
+    # For Faisal Bhai
     if i['status'] == "Not Visited":
         subject = "Hospital Appointment"
         message = f"""Assalamualaikum {i['patientsName']},
