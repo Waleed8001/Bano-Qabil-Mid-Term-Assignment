@@ -1,91 +1,192 @@
 import requests
-import datetime
+from datetime import datetime
 import smtplib
+import dotenv
+import os
 
-url1 = "https://api.sheety.co/468fa27b225c199db6181089b7355d81/hospitalAppointmentScheduler/hospital"
-url2 = "https://api.sheety.co/468fa27b225c199db6181089b7355d81/hospitalAppointmentScheduler/hospital"
-url3 = "https://api.sheety.co/468fa27b225c199db6181089b7355d81/hospitalAppointmentScheduler/hospital"
-url4 = "https://api.sheety.co/468fa27b225c199db6181089b7355d81/hospitalAppointmentScheduler/hospital"
+#dotenv.load_dotenv()
+
+sheet_url = "https://api.sheety.co/468fa27b225c199db6181089b7355d81/hospitalAppointmentScheduler/hospital"
 
 GMAIL = 'waleedkamal801@gmail.com'
-GMAILPASSWORD = 'kuep ufnk icfr pmwi'
-GMAILAPI = 'smtp.gmail.com'
-GMAILPORT = 587
+GMAIL_PASSWORD = 'kuep ufnk icfr pmwi'
+GMAIL_API = 'smtp.gmail.com'
+GMAIL_PORT = 587
 
-# It will take all data from Google Spreadsheet.
-def take():
-    a = requests.get(url = url1)
-    b = a.json().get('hospital',[])
-    return b
+# It will fetch all data from Google Spreadsheet.
 
-# It is used to send message through Gmail to the person given in the Google Spreadsheet.
-def mail(GMAILTO,subject,message):
-    with smtplib.SMTP(GMAILAPI,GMAILPORT) as has:
-        has.starttls()
-        has.login(GMAIL,GMAILPASSWORD)
-        send = f"SUbject:{subject}\n\n{message}"
-        has.sendmail(GMAIL,GMAILTO,send)
-        has.quit()
+
+def fetchAppointments():
+    try:
+        res = requests.get(url=sheet_url)
+        res.raise_for_status()
+        data = res.json().get('hospital', [])
+        return data
+    except Exception as e:
+        print(f'Error: {e}')
+
+
+def mail(GMAILTO, subject, message):
+    '''It is used to send message through Gmail to the person given in the Google Spreadsheet.'''
+    with smtplib.SMTP(GMAIL_API, GMAIL_PORT) as smtp:
+        smtp.starttls()
+        smtp.login(GMAIL, GMAIL_PASSWORD)
+        send = f"Subject:{subject}\n\n{message}"
+        smtp.sendmail(GMAIL, GMAILTO, send)
+        smtp.quit()
+
 
 # For Faisal Bhai
-# This function is used to Change status of Non Visited person to Last Warning.
 def update_sheet_for_Not_visiting(i_id):
-    o = i_id
-    hospitalAppointmentScheduler = {
-        "hospital":{
-            'status':"Last Warning"
+    '''This function is used to Change status of Non Visited person to Last Reminder.'''
+
+    try:
+        hospitalAppointmentScheduler = {
+            "hospital": {
+                'status': "Last Reminder"
+            }
         }
-    }
 
-    update = requests.put(url = f"{url3}/{o}",json = hospitalAppointmentScheduler)
-    update.raise_for_status()
+        upadate_res = requests.put(url=f"{sheet_url}/{i_id}", json=hospitalAppointmentScheduler)
+        upadate_res.raise_for_status()
+    except Exception as e:
+        print(f'Error: {e}')
 
-# This function is used to Change status of Registered person to Non Visited.
+
 def update_sheet_for_Registered(i_id):
-    o = i_id
-    hospitalAppointmentScheduler = {
-        "hospital":{
-            'status':"Not Visited"
-        }
-    }
+    '''This function is used to Change status of Registered person to Non Visited.'''
 
-    update = requests.put(url = f"{url3}/{o}",json = hospitalAppointmentScheduler)
-    update.raise_for_status()    
+    try:
+        hospitalAppointmentScheduler = {
+            "hospital": {
+                'status': "Not Visited"
+            }
+        }
+
+        upadate_res = requests.put(url=f"{sheet_url}/{i_id}", json=hospitalAppointmentScheduler)
+        upadate_res.raise_for_status()
+    except Exception as e:
+        print(f'Error: {e}')
 
 # For Faisal Bhai
-# This function is used to Delete the record of Visited Person.
-def delete_detail_of_visited_person(i_id):
-    i = i_id
-    del_data = requests.delete(url=f"{url4}/{i}")
-    del_data.raise_for_status()
 
-take = take()
-date = datetime.datetime.now()
-date2 = date.strftime("%m/%d/%Y")
-for i in take:
-    if i['dateOfAppointment'] == date2 and i['status'] == "Registered":
-        subject = "Hospital Appointment"
-        message = f"""Assalamualaikum {i['patientsName']},
-You came in our hospital in {i['dateTakenOn']} and have taken appointment for {i['dateOfAppointment']} for the desease of {i['disease']} and the age  of patient is {i['age']}. So please visit on the desired timing {i['timing']}.
+
+def delete_appointment(i_id):
+    '''This function is used to delete data/appointment of a person from the Google Spreadsheet.'''
+
+    try:
+        del_data = requests.delete(url=f"{sheet_url}/{i_id}")
+        del_data.raise_for_status()
+    except Exception as e:
+        print(f'Error: {e}')
+
+def delete_appointment2(i_id):
+    '''This function is used to delete data/appointment of a person from the Google Spreadsheet.'''
+
+    try:
+        del_data = requests.delete(url=f"{sheet_url}/{i_id}")
+        del_data.raise_for_status()
+    except Exception as e:
+        print(f'Error: {e}')        
+
+
+fetchAppointments = fetchAppointments()
+date = datetime.now()
+date_now = date.strftime("%d/%m/%Y")
+print(f'datetime, {date_now}')
+for appointment in fetchAppointments:
+    if appointment['dateOfAppointment'] == date_now: 
+        if appointment['status'] == "Registered":
+            subject = f"Your Appointment on {appointment['dateOfAppointment']}"
+            message = f"""Assalamualaikum {appointment['patientsName']},
+
+We have received your registration for the appointment on {appointment['dateOfAppointment']}. We are pleased to inform you that your appointment date has been arrived. However, It seems that you have not visited us yet on the scheduled date and time.
+
+Please visit us on the scheduled date and time. If you are unable to visit us on the scheduled date and time, please inform us at least 24 hours before the scheduled appointment time. We will be more than happy to reschedule the appointment for you.
+
+Thank you for your cooperation.
+
+For any query please call:
+03242923319
+
+Regards,
+Hospital Administration.
+"""
+
+            mail(appointment['email'], subject, message)
+            update_sheet_for_Registered(appointment['id'])
+
+    # For Faisal Bhai
+        if appointment['status'] == "Visited":
+            subject = "Confirmation of Appointment, Visit and Removal from List"
+            message = f"""Assalamualaikum {appointment['patientsName']},
+We see that you’ve already visited the department. We will now proceed to remove your appointment from our list. Thank you for attending your appointment. If you need further assistance or wish to reschedule.
+
 Thank you.
 
 For any query please call:
-03242923319"""
-        mail(i['email'],subject,message)
-        update_sheet_for_Registered(i['id'])
+03242923319
+
+Regards,
+Hospital Administration.
+"""
+
+            delete_appointment(appointment['id'])
 
     # For Faisal Bhai
-    if i['status'] == "Visited":
-        delete_detail_of_visited_person(i['id'])
+        if appointment['status'] == "Not Visited":
+            subject = "Final Reminder: Confirm Your Appointment or Visit Us"
+            message = f"""Assalamualaikum {appointment['patientsName']},
+You came in our hospital on {appointment['dateTakenOn']} and have taken appointment for {appointment['dateOfAppointment']} for the desease of {appointment['disease']} and the age  of patient is {appointment['age']} but you still not visited in the department. It is your last Reminder otherwise your registeration will be cancelled. If you want to cancel registration so please call in the given number. So please visit on the desired timing {appointment['timing']}.If you want to cancel your registration so please call on the given number.
+Thank you.
 
-    # For Faisal Bhai
-    if i['status'] == "Not Visited":
-        subject = "Hospital Appointment"
-        message = f"""Assalamualaikum {i['patientsName']},
-You came in our hospital in {i['dateTakenOn']} and have taken appointment for {i['dateOfAppointment']} for the desease of {i['disease']} and the age  of patient is {i['age']} but you still not visited in the department. It is your last warning otherwise your registeration will be cancelled. If you want to cancel registration so please call in the given number. So please visit on the desired timing {i['timing']}.If you want to cancel your registration so please call on the given number.
 Thank you.
 
 For any query please call:
-03242923319"""
-        update_sheet_for_Not_visiting(i['id'])
-        mail(i['email'],subject,message)
+03242923319
+
+Regards,
+Hospital Administration.
+"""
+            mail(appointment['email'], subject, message)
+            update_sheet_for_Not_visiting(appointment['id'])
+
+        if appointment['status'] == "Last Reminder":
+            subject = "Deletion Update of Appointment"
+            message = f"""Assalamualaikum {appointment['patientsName']},
+We are sorry to inform you that your appointment for {appointment['dateOfAppointment']} for {appointment['disease']} is not attended yet. As per our record, you have received several reminders but you haven't visited us yet. So, we have cancelled your appointment.
+
+Thank you.
+
+For any query please call:
+03242923319
+
+Regards,
+Hospital Administration.
+"""
+            mail(appointment['email'], subject, message)
+            delete_appointment2(appointment['id'])
+       #     mail(appointment['email'], subject, message)
+        
+        
+''' and appointment['status'] == "Registered":
+        subject = f"Appointment Confirmation for {
+            appointment['dateOfAppointment']}"
+        message = f"""Assalamualaikum {appointment['patientsName']},
+
+We have received your registration for the appointment on {appointment['dateOfAppointment']}. We are pleased to inform you that your appointment has been confirmed. We are looking forward to seeing you on the scheduled date and time.
+
+However, should you be unable to visit us on the scheduled date and time, please inform us at least 24 hours before the scheduled appointment time. We will be more than happy to reschedule the appointment for you.
+
+Thank you for your cooperation.
+
+For any query please call:
+03242923319
+
+Regards,
+Hospital Administration.
+"""
+
+        mail(appointment['email'], subject, message)'''
+
+        
