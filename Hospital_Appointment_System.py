@@ -95,10 +95,9 @@ date = datetime.now()
 date_now = date.strftime("%d/%m/%Y")
 print(f'datetime, {date_now}')
 for appointment in fetchAppointments:
-    if appointment['dateOfAppointment'] == date_now: 
-        if appointment['status'] == "Registered":
-            subject = f"Your Appointment on {appointment['dateOfAppointment']}"
-            message = f"""Assalamualaikum {appointment['patientsName']},
+    if appointment['dateOfAppointment'] == date_now and appointment['status'] == "Registered":
+        subject = f"Your Appointment on {appointment['dateOfAppointment']}"
+        message = f"""Assalamualaikum {appointment['patientsName']},
 
 We have received your registration for the appointment on {appointment['dateOfAppointment']}. We are pleased to inform you that your appointment date has been arrived. However, It seems that you have not visited us yet on the scheduled date and time.
 
@@ -113,13 +112,13 @@ Regards,
 Hospital Administration.
 """
 
-            mail(appointment['email'], subject, message)
-            update_sheet_for_Registered(appointment['id'])
+        mail(appointment['email'], subject, message)
+        update_sheet_for_Registered(appointment['id'])
 
     # For Faisal Bhai
-        if appointment['status'] == "Visited":
-            subject = "Confirmation of Appointment, Visit and Removal from List"
-            message = f"""Assalamualaikum {appointment['patientsName']},
+    if appointment['status'] == "Visited":
+        subject = "Confirmation of Appointment, Visit and Removal from List"
+        message = f"""Assalamualaikum {appointment['patientsName']},
 We see that you’ve already visited the department. We will now proceed to remove your appointment from our list. Thank you for attending your appointment. If you need further assistance or wish to reschedule.
 
 Thank you.
@@ -131,12 +130,12 @@ Regards,
 Hospital Administration.
 """
 
-            delete_appointment(appointment['id'])
+        delete_appointment(appointment['id'])
 
     # For Faisal Bhai
-        if appointment['status'] == "Not Visited":
-            subject = "Final Reminder: Confirm Your Appointment or Visit Us"
-            message = f"""Assalamualaikum {appointment['patientsName']},
+    if appointment['status'] == "Not Visited":
+        subject = "Final Reminder: Confirm Your Appointment or Visit Us"
+        message = f"""Assalamualaikum {appointment['patientsName']},
 You came in our hospital on {appointment['dateTakenOn']} and have taken appointment for {appointment['dateOfAppointment']} for the desease of {appointment['disease']} and the age  of patient is {appointment['age']} but you still not visited in the department. It is your last Reminder otherwise your registeration will be cancelled. If you want to cancel registration so please call in the given number. So please visit on the desired timing {appointment['timing']}.If you want to cancel your registration so please call on the given number.
 Thank you.
 
@@ -148,12 +147,12 @@ For any query please call:
 Regards,
 Hospital Administration.
 """
-            mail(appointment['email'], subject, message)
-            update_sheet_for_Not_visiting(appointment['id'])
+        mail(appointment['email'], subject, message)
+        update_sheet_for_Not_visiting(appointment['id'])
 
-        if appointment['status'] == "Last Reminder":
-            subject = "Deletion Update of Appointment"
-            message = f"""Assalamualaikum {appointment['patientsName']},
+    if appointment['status'] == "Last Reminder":
+        subject = "Deletion Update of Appointment"
+        message = f"""Assalamualaikum {appointment['patientsName']},
 We are sorry to inform you that your appointment for {appointment['dateOfAppointment']} for {appointment['disease']} is not attended yet. As per our record, you have received several reminders but you haven't visited us yet. So, we have cancelled your appointment.
 
 Thank you.
@@ -164,8 +163,8 @@ For any query please call:
 Regards,
 Hospital Administration.
 """
-            mail(appointment['email'], subject, message)
-            delete_appointment2(appointment['id'])
+        mail(appointment['email'], subject, message)
+        delete_appointment2(appointment['id'])
        #     mail(appointment['email'], subject, message)
         
         
