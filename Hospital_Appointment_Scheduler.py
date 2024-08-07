@@ -70,12 +70,17 @@ def update_sheet_for_Registered(i_id):
 # For Faisal Bhai
 
 
-def delete_appointment(i_id):
-    '''This function is used to delete data/appointment of a person from the Google Spreadsheet.'''
-
+def update_sheet_for_Visited_and_Last_Reminder(i_id):
+    '''This function is used to Change status of Visited and Last Reminder person to Ready to Delete.'''
     try:
-        del_data = requests.delete(url=f"{sheet_url}/{i_id}")
-        del_data.raise_for_status()
+        hospitalAppointmentScheduler = {
+            "hospital": {
+                'status': "Ready to Delete"
+            }
+        }
+
+        upadate_res = requests.put(url=f"{sheet_url}/{i_id}", json=hospitalAppointmentScheduler)
+        upadate_res.raise_for_status()
     except Exception as e:
         print(f'Error: {e}')
 
@@ -129,7 +134,7 @@ Regards,
 Hospital Administration.
 """
         mail(appointment['email'], subject, message)
-        delete_appointment(appointment['id'])
+        update_sheet_for_Visited_and_Last_Reminder(appointment['id'])
 
     # For Faisal Bhai
     if appointment['status'] == "Not Visited":
@@ -163,4 +168,4 @@ Regards,
 Hospital Administration.
 """
         mail(appointment['email'], subject, message)
-        delete_appointment2(appointment['id'])
+        update_sheet_for_Visited_and_Last_Reminder(appointment['id'])
