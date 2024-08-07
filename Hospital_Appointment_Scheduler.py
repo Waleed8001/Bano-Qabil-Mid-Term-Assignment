@@ -9,7 +9,7 @@ import os
 sheet_url = "https://api.sheety.co/468fa27b225c199db6181089b7355d81/hospitalAppointmentScheduler/hospital"
 
 GMAIL = 'waleedkamal801@gmail.com'
-GMAIL_PASSWORD = 'kuep ufnk icfr pmwi'
+GMAIL_PASSWORD = 'my-password'
 GMAIL_API = 'smtp.gmail.com'
 GMAIL_PORT = 587
 
